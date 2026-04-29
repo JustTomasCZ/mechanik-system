@@ -1,0 +1,62 @@
+# 🔧 Mechanik System (Electron App)
+
+Mechanik System je desktopová aplikace (.exe) vytvořená pro RP servery, která slouží mechanikům pro evidenci směn, zakázek a výpočtu výplaty.
+
+Aplikace automaticky odesílá logy do Discordu pomocí webhooků a počítá výplaty na základě provedené práce.
+
+---
+
+## 🚀 Funkce
+
+- 🟢 Start / konec směny
+- 🔧 Záznam zakázek (Tuning / Oprava)
+- 👥 Výběr frakce (LSPD / EMS / LSSD / OBČAN)
+- 💰 Automatický výpočet výplaty (20 % z obratu)
+- 📊 Přehled zakázek a vydělané částky
+- 📩 Discord webhook integrace (logy do kanálů)
+- 🔄 Automatické resetování směny
+- 💾 Ukládání dat (localStorage)
+- ⚡ Electron desktop aplikace (.exe)
+
+---
+
+## 📦 Jak to funguje
+
+1. Spustíš aplikaci
+2. Zadáš jméno mechanika
+3. Spustíš směnu
+4. Zapisuješ zakázky
+5. Aplikace:
+   - počítá cenu (150$ za komponent)
+   - přidává 20% do výplaty
+   - posílá logy na Discord
+6. Po ukončení směny se vše vyresetuje
+
+---
+
+## 💰 Výpočet výplaty
+
+Příklad:
+- 10 zakázek
+- 10 000$ obrat
+- výplata = 2 000$
+
+---
+
+## 📡 Discord integrace
+
+Aplikace posílá data přes webhooky:
+
+- LSPD kanál
+- EMS kanál
+- LSSD kanál
+- OBČAN kanál
+- SMĚNY log kanál
+
+---
+
+## 🖥️ Instalace / spuštění (dev)
+
+```bash
+npm install
+npm start
