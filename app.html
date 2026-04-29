@@ -151,7 +151,15 @@ function sendLog() {
   const typ = document.getElementById("typ").value;
   const components = Number(document.getElementById("components").value);
 
-  const price = components * 150;
+  const PRICES = {
+    LSPD: 90,
+    EMS: 150,
+    LSSD: 150,
+    OBČAN: 150
+  };
+
+  // ✅ TADY se spočítá cena
+  const price = PRICES[frakce] * components;
 
   jobs++;
   total += price;
@@ -159,15 +167,22 @@ function sendLog() {
   const msg =
 `🔧 ${typ.toUpperCase()} ZAKÁZKA
 Mechanik: ${name}
+Frakce: ${frakce}
 Komponenty: ${components}
 Cena: ${price}$`;
 
-  sendWebhook(WEBHOOKS[frakce], msg);
+  const hookMap = {
+    LSPD: WEBHOOKS.LSPD,
+    EMS: WEBHOOKS.EMS,
+    LSSD: WEBHOOKS.LSSD,
+    OBČAN: WEBHOOKS.OBČAN
+  };
+
+  sendWebhook(hookMap[frakce], msg);
 
   updateUI();
   save();
 }
-
 /* =======================
    VÝPOČET
 ======================= */
