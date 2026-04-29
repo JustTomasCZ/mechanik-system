@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Mechanik System</title>
+
+<style>
+body { font-family: Arial; background:#111; color:white; padding:20px; }
+input, select, button { padding:10px; margin:5px; }
+.card { background:#222; padding:15px; margin-bottom:10px; border-radius:10px; }
+h2 { margin-top:0; }
+.big { font-size:22px; font-weight:bold; color:#00ff88; }
+button { cursor:pointer; }
+</style>
+
+</head>
+
+<body>
+
+<h1>🔧 Mechanik System (WEB)</h1>
+
+<div class="card">
+<h2>👤 Mechanik</h2>
+<input id="mechanik" placeholder="Jméno mechanika">
+</div>
+
+<div class="card">
+<h2>⏱ Směna</h2>
+<button onclick="startShift()">🟢 Start směny</button>
+<button onclick="endShift()">🔴 Konec směny</button>
+<p id="shiftStatus">Směna: ❌ neaktivní</p>
+</div>
+
+<div class="card">
+<h2>🔧 Zakázka</h2>
+
+<select id="frakce">
+<option>LSPD</option>
+<option>EMS</option>
+<option>LSSD</option>
+<option>OBČAN</option>
+</select>
+
+<select id="typ">
+<option>Tuning</option>
+<option>Oprava</option>
+</select>
+
+<br>
+
+<input id="components" type="number" placeholder="Počet komponent">
+
+<br>
+
+<button onclick="sendLog()">📩 Odeslat</button>
+</div>
+
+<div class="card">
+<h2>💰 Výplata za směnu</h2>
+
+<p class="big" id="salary">0 $</p>
+<p>🔧 Zakázky: <span id="jobs">0</span></p>
+<p>💵 Celkový obrat: <span id="total">0</span> $</p>
+</div>
+
+<script>
+
+/* =======================
+   WEBHOOKY
+======================= */
+const WEBHOOKS = {
+  LSPD: "TVUJ_WEBHOOK",
+  EMS: "TVUJ_WEBHOOK",
+  LSSD: "TVUJ_WEBHOOK",
+  OBČAN: "TVUJ_WEBHOOK",
+  SHIFTS: "TVUJ_WEBHOOK"
+};
+
+/* =======================
+   STAV
+======================= */
+let shiftActive = false;
+let jobs = 0;
+let total = 0;
+
+/* LOAD */
+if (localStorage.getItem("jobs")) {
+  jobs = Number(localStorage.getItem("jobs"));
+  total = Number(localStorage.getItem("total"));
+  shiftActive = localStorage.getItem("shift") === "true";
+  updateUI();
+}
+
+function save() {
+  localStorage.setItem("jobs", jobs);
+  localStorage.setItem("total", total);
+  localStorage.setItem("shift", shiftActive);
+}
+
+/* =======================
+   DISCORD
+======================= */
+function sendWebhook(url, content) {
+  fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content })
+  });
+}
+
+/* =======================
+   SMĚNA
+======================= */
+function startShift() {
+  shiftActive = true;
+
+  const name = document.getElementById("mechanik").value;
+
+  sendWebhook(WEBHOOKS.SHIFTS,
+    `🟢 START SMĚNY\nMechanik: ${name}\nČas: ${new Date().toLocaleString()}`
+  );
+
+  updateUI();
+  save();
+}
+
+function endShift() {
+  shiftActive = false;
+
+  const name = document.getElementById("mechanik").value;
+
+  sendWebhook(WEBHOOKS.SHIFTS,
+    `🔴 KONEC SMĚNY\nMechanik: ${name}\nVýplata: ${getSalary()}$\nČas: ${new Date().toLocaleString()}`
+  );
+
+  jobs = 0;
+  total = 0;
+
+  updateUI();
+  save();
+}
+
+/* =======================
+   ZAKÁZKA
+======================= */
+function sendLog() {
+  if (!shiftActive) return alert("Nejdřív začni směnu!");
+
+  const name = document.getElementById("mechanik").value;
+  const frakce = document.getElementById("frakce").value;
+  const typ = document.getElementById("typ").value;
+  const components = Number(document.getElementById("components").value);
+
+  const price = components * 150;
+
+  jobs++;
+  total += price;
+
+  const msg =
+`🔧 ${typ.toUpperCase()} ZAKÁZKA
+Mechanik: ${name}
+Komponenty: ${components}
+Cena: ${price}$`;
+
+  sendWebhook(WEBHOOKS[frakce], msg);
+
+  updateUI();
+  save();
+}
+
+/* =======================
+   VÝPOČET
+======================= */
+function getSalary() {
+  return Math.floor(total * 0.2);
+}
+
+/* =======================
+   UI
+======================= */
+function updateUI() {
+  document.getElementById("jobs").innerText = jobs;
+  document.getElementById("total").innerText = total;
+  document.getElementById("salary").innerText = getSalary() + " $";
+
+  document.getElementById("shiftStatus").innerText =
+    "Směna: " + (shiftActive ? "✔ aktivní" : "❌ neaktivní");
+}
+
+</script>
+
+</body>
+</html>
